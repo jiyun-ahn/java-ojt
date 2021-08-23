@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+ 
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+ 
+	<!-- AOP Transaction을 실행하는 대상 Method 설정 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes> 
+			<tx:method name="insert*" rollback-for="RuntimeException"></tx:method>
+			<tx:method name="create*" rollback-for="RuntimeException"></tx:method>
+			<tx:method name="update*" rollback-for="RuntimeException"></tx:method>
+			<tx:method name="delete*" rollback-for="RuntimeException"></tx:method>
+			<tx:method name="select*" read-only="true"></tx:method>
+			<tx:method name="get*" read-only="true"></tx:method>
+		</tx:attributes>
+	</tx:advice>
+	
+	<aop:config>
+		<aop:pointcut id="serviceTxMethod" expression="execution(public * com.ojt.service..*Service.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="serviceTxMethod" />
+	</aop:config>
+
+</beans>
